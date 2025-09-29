@@ -1,0 +1,151 @@
+{% extends "base.html" %}
+
+{% block title %}Create Presentation - PPT Generator{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h1 style="color: var(--primary-color);">➕ Create New Presentation</h1>
+    <a href="{{ url_for('user.dashboard') }}" class="btn btn-outline">← Back to Dashboard</a>
+</div>
+
+<form method="POST" id="presentation-form" novalidate>
+    {{ form.hidden_tag() }}
+    
+    <!-- Basic Information -->
+    <div class="card mb-3">
+        <div class="card-header">
+            📋 Basic Information
+        </div>
+        <div class="card-body">
+            <div class="form-group">
+                {{ form.title.label(class="form-label") }}
+                {{ form.title(class="form-control" + (" is-invalid" if form.title.errors else ""), required=true, placeholder="Enter presentation title") }}
+                {% for error in form.title.errors %}
+                    <div class="invalid-feedback">{{ error }}</div>
+                {% endfor %}
+            </div>
+
+            <div class="form-group">
+                {{ form.description.label(class="form-label") }}
+                {{ form.description(class="form-control", rows="3", placeholder="Brief description of the presentation (optional)") }}
+                {% for error in form.description.errors %}
+                    <div class="invalid-feedback">{{ error }}</div>
+                {% endfor %}
+            </div>
+
+            <div class="form-group">
+                {{ form.agenda.label(class="form-label") }}
+                {{ form.agenda(class="form-control" + (" is-invalid" if form.agenda.errors else ""), rows="4", required=true, placeholder="Enter agenda items, one per line:\\n• Introduction\\n• Main Topics\\n• Conclusion") }}
+                {% for error in form.agenda.errors %}
+                    <div class="invalid-feedback">{{ error }}</div>
+                {% endfor %}
+                <small class="form-text text-muted">Enter one agenda item per line</small>
+            </div>
+        </div>
+    </div>
+
+    <!-- Slide Builder -->
+    <div class="card mb-3">
+        <div class="card-header d-flex justify-content-between align-items-center">
+            <span>🎯 Slide Builder</span>
+            <button type="button" id="add-slide-btn" class="btn btn-secondary btn-sm">
+                ➕ Add Slide
+            </button>
+        </div>
+        <div class="card-body">
+            <p class="text-muted mb-3">
+                Build your presentation by adding slides. Each slide should have a title and content. 
+                Use bullet points (• or -) for lists, and indent with spaces for sub-bullets.
+            </p>
+            
+            <!-- Slides Container -->
+            <div id="slides-container">
+                <!-- Slides will be added here dynamically -->
+            </div>
+
+            <div id="no-slides-message" class="text-center" style="padding: 2rem; background: var(--light-color); border-radius: 4px;">
+                <div style="font-size: 2rem; margin-bottom: 1rem;">📄</div>
+                <p>No slides added yet. Click "Add Slide" to get started!</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Hidden field for slides data -->
+    {{ form.slides_data(id="slides_data", style="display: none;") }}
+
+    <!-- Submit Button -->
+    <div class="text-center">
+        <button type="submit" class="btn btn-primary" style="padding: 1rem 2rem; font-size: 1.1rem;">
+            🚀 Generate Presentation
+        </button>
+    </div>
+</form>
+
+<!-- Help Section -->
+<div class="card" style="margin-top: 2rem; border-left: 4px solid var(--info-color);">
+    <div class="card-body">
+        <h5 style="color: var(--info-color); margin-bottom: 1rem;">💡 Tips for Better Presentations</h5>
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1rem;">
+            <div>
+                <h6>Content Structure</h6>
+                <ul style="margin-bottom: 0;">
+                    <li>Keep slide titles clear and concise</li>
+                    <li>Use bullet points for key information</li>
+                    <li>Limit content per slide</li>
+                </ul>
+            </div>
+            <div>
+                <h6>Bullet Points</h6>
+                <ul style="margin-bottom: 0;">
+                    <li>Use • or - for main bullets</li>
+                    <li>Indent with spaces for sub-bullets</li>
+                    <li>Example: "  • Sub-point"</li>
+                </ul>
+            </div>
+            <div>
+                <h6>Best Practices</h6>
+                <ul style="margin-bottom: 0;">
+                    <li>Start with an engaging title slide</li>
+                    <li>Include a clear agenda</li>
+                    <li>End with key takeaways</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    // Initialize slides container visibility
+    document.addEventListener('DOMContentLoaded', function() {
+        updateSlidesVisibility();
+    });
+
+    function updateSlidesVisibility() {
+        const slidesContainer = document.getElementById('slides-container');
+        const noSlidesMessage = document.getElementById('no-slides-message');
+        
+        if (slidesContainer.children.length === 0) {
+            noSlidesMessage.style.display = 'block';
+        } else {
+            noSlidesMessage.style.display = 'none';
+        }
+    }
+
+    // Override the addSlide function to update visibility
+    if (window.slideBuilder) {
+        const originalAddSlide = window.slideBuilder.addSlide;
+        window.slideBuilder.addSlide = function() {
+            originalAddSlide.call(this);
+            updateSlidesVisibility();
+        };
+
+        const originalRemoveSlide = window.slideBuilder.removeSlide;
+        window.slideBuilder.removeSlide = function(slideId) {
+            originalRemoveSlide.call(this, slideId);
+            updateSlidesVisibility();
+        };
+    }
+</script>
+{% endblock %}

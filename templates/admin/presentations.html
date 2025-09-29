@@ -1,0 +1,52 @@
+{% extends "base.html" %}
+
+{% block title %}All Presentations{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h1>All Presentations</h1>
+        <a href="{{ url_for('user.dashboard') }}" class="btn btn-outline-secondary">← Back to Dashboard</a>
+    </div>
+
+    <div class="table-responsive">
+        <table class="table table-hover table-striped align-middle">
+            <thead class="table-light">
+                <tr>
+                    <th>Title</th>
+                    <th>Author</th>
+                    <th>Status</th>
+                    <th>Submitted At</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for pres in presentations %}
+                <tr>
+                    <td class="text-truncate" style="max-width: 250px;" title="{{ pres.title }}">{{ pres.title }}</td>
+                    <td>{{ pres.author.username }}</td>
+                    <td>
+                        {% if pres.status == 'approved' %}
+                            <span class="badge bg-success">{{ pres.status.capitalize() }}</span>
+                        {% elif pres.status == 'rejected' %}
+                            <span class="badge bg-danger">{{ pres.status.capitalize() }}</span>
+                        {% else %}
+                            <span class="badge bg-warning text-dark">{{ pres.status.capitalize() }}</span>
+                        {% endif %}
+                    </td>
+                    <td>{{ pres.created_at.strftime('%d %b %Y %H:%M') }}</td>
+                    <td>
+                        <a href="{{ url_for('admin.view_presentation', pres_id=pres.id) }}" class="btn btn-sm btn-primary me-1">View</a>
+                        <!-- Future: Add Approve/Reject buttons here if admin -->
+                    </td>
+                </tr>
+                {% else %}
+                <tr>
+                    <td colspan="5" class="text-center">No presentations found.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

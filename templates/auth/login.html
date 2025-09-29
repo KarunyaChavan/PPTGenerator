@@ -1,0 +1,61 @@
+{% extends "base.html" %}
+
+{% block title %}Login - PPT Generator{% endblock %}
+
+{% block content %}
+<div style="max-width: 400px; margin: 2rem auto;">
+    <div class="card">
+        <div class="card-header">
+            🔐 Sign In
+        </div>
+        <div class="card-body">
+            <form method="POST" novalidate>
+                {{ form.hidden_tag() }}
+                
+                <div class="form-group">
+                    {{ form.email.label(class="form-label") }}
+                    {{ form.email(class="form-control" + (" is-invalid" if form.email.errors else ""), required=true) }}
+                    {% for error in form.email.errors %}
+                        <div class="invalid-feedback">{{ error }}</div>
+                    {% endfor %}
+                </div>
+
+                <div class="form-group">
+                    {{ form.password.label(class="form-label") }}
+                    {{ form.password(class="form-control" + (" is-invalid" if form.password.errors else ""), required=true) }}
+                    {% for error in form.password.errors %}
+                        <div class="invalid-feedback">{{ error }}</div>
+                    {% endfor %}
+                </div>
+
+                <div class="form-group">
+                    <div style="display: flex; align-items: center; gap: 0.5rem;">
+                        {{ form.remember_me(class="form-check-input") }}
+                        {{ form.remember_me.label(class="form-check-label") }}
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    {{ form.submit(class="btn btn-primary", style="width: 100%;") }}
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div class="text-center" style="margin-top: 1rem;">
+        <p>Don't have an account? <a href="{{ url_for('auth.register') }}" style="color: var(--secondary-color);">Register here</a></p>
+    </div>
+
+    <!-- Demo Credentials -->
+    <div class="card" style="margin-top: 2rem; border: 2px solid var(--info-color);">
+        <div class="card-body">
+            <h5 style="color: var(--info-color); margin-bottom: 1rem;">🎯 Demo Credentials</h5>
+            <div style="background: var(--light-color); padding: 1rem; border-radius: 4px;">
+                <p><strong>Admin User:</strong></p>
+                <p>Email: admin@company.com<br>Password: admin123</p>
+                <p style="margin-top: 1rem;"><strong>Note:</strong> Register as a regular user to test the full workflow!</p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

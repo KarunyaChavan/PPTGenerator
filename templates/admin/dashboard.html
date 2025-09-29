@@ -1,0 +1,94 @@
+{% extends "base.html" %}
+
+{% block title %}Admin Dashboard{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <h1 class="mb-4">Admin Dashboard</h1>
+
+    <!-- Summary Cards -->
+    <div class="row mb-4">
+        <div class="col-md-3">
+            <div class="card text-white bg-primary mb-3">
+                <div class="card-body">
+                    <h5 class="card-title">Total Users</h5>
+                    <p class="card-text fs-4">{{ stats.total_users }}</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card text-white bg-success mb-3">
+                <div class="card-body">
+                    <h5 class="card-title">Pending Presentations</h5>
+                    <p class="card-text fs-4">{{ stats.pending_presentations }}</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card text-white bg-warning mb-3">
+                <div class="card-body">
+                    <h5 class="card-title">Approved Presentations</h5>
+                    <p class="card-text fs-4">{{ stats.approved_presentations }}</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card text-white bg-danger mb-3">
+                <div class="card-body">
+                    <h5 class="card-title">Rejected Presentations</h5>
+                    <p class="card-text fs-4">{{ stats.rejected_presentations }}</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Recent Presentations Table -->
+    <div class="card">
+        <div class="card-header">
+            Recent Presentations
+        </div>
+        <div class="card-body">
+            <table class="table table-hover">
+                <thead>
+                    <tr>
+                        <th>Title</th>
+                        <th>Author</th>
+                        <th>Status</th>
+                        <th>Submitted At</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for pres in recent_presentations %}
+                    <tr>
+                        <td>{{ pres.title }}</td>
+                        <td>{{ pres.author.username }}</td>
+                        <td>
+                            {% if pres.status == 'pending' %}
+                                <span class="badge bg-warning">Pending</span>
+                            {% elif pres.status == 'approved' %}
+                                <span class="badge bg-success">Approved</span>
+                            {% else %}
+                                <span class="badge bg-danger">Rejected</span>
+                            {% endif %}
+                        </td>
+                        <td>{{ pres.created_at.strftime('%d %b %Y %H:%M') }}</td>
+                        <td>
+                            <a href="{{ url_for('admin.review_presentation', id=pres.id) }}" class="btn btn-sm btn-primary">View</a>
+                            {% if pres.status == 'pending' %}
+                                <a href="{{ url_for('admin.review_presentation', id=pres.id) }}" class="btn btn-sm btn-success">Approve</a>
+                                <a href="{{ url_for('admin.review_presentation', id=pres.id) }}" class="btn btn-sm btn-danger">Reject</a>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% else %}
+                    <tr>
+                        <td colspan="5" class="text-center">No presentations found.</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

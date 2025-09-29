@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}PPT Generator{% endblock %}</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="container">
+            <a href="{{ url_for('main.index') }}" class="navbar-brand">
+                🎯 PPT Generator
+            </a>
+            
+            <ul class="navbar-nav">
+                {% if current_user.is_authenticated %}
+                    {% if current_user.is_admin() %}
+                        <li><a href="{{ url_for('admin.dashboard') }}" class="nav-link">Admin Dashboard</a></li>
+                        <li><a href="{{ url_for('admin.list_presentations') }}" class="nav-link">All Presentations</a></li>
+                        <li><a href="{{ url_for('admin.list_users') }}" class="nav-link">Users</a></li>
+                    {% else %}
+                        <li><a href="{{ url_for('user.dashboard') }}" class="nav-link">Dashboard</a></li>
+                        <li><a href="{{ url_for('user.create_presentation') }}" class="nav-link">Create Presentation</a></li>
+                    {% endif %}
+                    <li>
+                        <span class="nav-link">Welcome, {{ current_user.username }}!</span>
+                    </li>
+                    <li><a href="{{ url_for('auth.logout') }}" class="nav-link">Logout</a></li>
+                {% else %}
+                    <li><a href="{{ url_for('main.about') }}" class="nav-link">About</a></li>
+                    <li><a href="{{ url_for('auth.login') }}" class="nav-link">Login</a></li>
+                    <li><a href="{{ url_for('auth.register') }}" class="nav-link">Register</a></li>
+                {% endif %}
+            </ul>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <div class="container">
+            <!-- Alerts Container -->
+            <div id="alerts-container">
+                {% with messages = get_flashed_messages(with_categories=true) %}
+                    {% if messages %}
+                        {% for category, message in messages %}
+                            <div class="alert alert-{{ 'danger' if category == 'error' else category }}">
+                                {{ message }}
+                            </div>
+                        {% endfor %}
+                    {% endif %}
+                {% endwith %}
+            </div>
+
+            {% block content %}{% endblock %}
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer style="background-color: var(--primary-color); color: var(--white); text-align: center; padding: 1rem 0; margin-top: 2rem;">
+        <div class="container">
+            <p>&copy; 2023 PPT Generator. Streamlining presentation creation with automated templates.</p>
+        </div>
+    </footer>
+
+    <!-- Scripts -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="{{ url_for('static', filename='js/app.js') }}"></script>
+    {% block scripts %}{% endblock %}
+</body>
+</html>

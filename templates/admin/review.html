@@ -1,0 +1,86 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="card">
+        <div class="card-header">
+            <h3>Review Presentation</h3>
+            <a href="{{ url_for('admin.view_versions', id=presentation.id) }}" class="btn btn-outline-info float-end">Version Control</a>
+        </div>
+        <div class="card-body">
+            <div class="row mb-4">
+                <div class="col-md-6">
+                    <h5>Presentation Details</h5>
+                    <p><strong>Title:</strong> {{ presentation.title }}</p>
+                    <p><strong>Submitted By:</strong> {{ presentation.author.username }}</p>
+                    <p><strong>Submitted On:</strong> {{ presentation.created_at.strftime('%Y-%m-%d %H:%M:%S') }}</p>
+                    <p><strong>Status:</strong> 
+                        <span class="badge {% if presentation.status == 'pending' %}bg-warning{% elif presentation.status == 'approved' %}bg-success{% else %}bg-danger{% endif %}">
+                            {{ presentation.status|title }}
+                        </span>
+                    </p>
+                    {% if presentation.review_notes %}
+                    <p><strong>Review Notes:</strong> {{ presentation.review_notes }}</p>
+                    {% endif %}
+                </div>
+                <div class="col-md-6">
+                    <h5>Review Form</h5>
+                    <form method="POST">
+                        {{ form.hidden_tag() }}
+                        <div class="mb-3">
+                            {{ form.feedback.label(class="form-label") }}
+                            {{ form.feedback(class="form-control" + (" is-invalid" if form.feedback.errors else "")) }}
+                            {% for error in form.feedback.errors %}
+                                <div class="invalid-feedback">{{ error }}</div>
+                            {% endfor %}
+                        </div>
+                        <div class="mb-3">
+                            {{ form.status.label(class="form-label") }}
+                            {{ form.status(class="form-select" + (" is-invalid" if form.status.errors else "")) }}
+                            {% for error in form.status.errors %}
+                                <div class="invalid-feedback">{{ error }}</div>
+                            {% endfor %}
+                        </div>
+                        <div class="d-grid gap-2">
+                            {{ form.submit(class="btn btn-primary") }}
+                            <a href="{{ url_for('admin.dashboard') }}" class="btn btn-secondary">Back to Dashboard</a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+            {% if presentation.file_path %}
+            <div class="row">
+                <div class="col">
+                    <h5>Download Presentation</h5>
+                    <a href="{{ url_for('user.download_presentation', id=presentation.id) }}" class="btn btn-info">
+                        <i class="fas fa-download"></i> Download Presentation
+                    </a>
+                </div>
+            </div>
+            {% endif %}
+            <!-- Slides Section for Admin Review -->
+            {% if presentation.slides %}
+            <hr>
+            <h4>Slides</h4>
+            {% for slide in presentation.slides %}
+                <div class="card mb-3">
+                    <div class="card-header">
+                        <strong>Slide {{ loop.index }}: {{ slide.title }}</strong>
+                    </div>
+                    <div class="card-body">
+                        {% for line in slide.content.splitlines() %}
+                            {% if line.strip().startswith('•') or line.strip().startswith('-') %}
+                                <li>{{ line.strip()[1:] }}</li>
+                            {% else %}
+                                <p>{{ line }}</p>
+                            {% endif %}
+                        {% endfor %}
+                    </div>
+                </div>
+            {% endfor %} {% else %}
+                <p class="text-muted">No slides found for this presentation.</p>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,55 @@
+{% extends "base.html" %}
+
+{% block title %}Version Control - {{ presentation.title }}{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2>Version Control for: {{ presentation.title }}</h2>
+    <a href="{{ url_for('admin.review_presentation', id=presentation.id) }}" class="btn btn-outline-secondary mb-3">← Back to Review</a>
+    <div class="card">
+        <div class="card-header">
+            <strong>All Versions</strong>
+        </div>
+        <div class="card-body p-0">
+            <table class="table table-striped mb-0">
+                <thead>
+                    <tr>
+                        <th>Version</th>
+                        <th>Date</th>
+                        <th>Author</th>
+                        <th>Description</th>
+                        <th>Download</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                {% for version in versions %}
+                    <tr {% if presentation.current_version == version.version_number %}class="table-success"{% endif %}>
+                        <td>v{{ version.version_number }}</td>
+                        <td>{{ version.created_at.strftime('%Y-%m-%d %H:%M') }}</td>
+                        <td>{{ version.creator.username if version.creator else 'Unknown' }}</td>
+                        <td>{{ version.change_description or '—' }}</td>
+                        <td>
+                            {% if version.file_exists() %}
+                            <a href="{{ url_for('user.download_presentation', presentation_id=version.presentation_id, version_number=version.version_number) }}" class="btn btn-sm btn-info">Download</a>
+                            {% else %}
+                            <span class="text-danger">Missing</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if presentation.current_version != version.version_number %}
+                            <form method="POST" action="{{ url_for('admin.rollback_version', presentation_id=presentation.id, version_number=version.version_number) }}" style="display:inline;">
+                                <button type="submit" class="btn btn-sm btn-warning" onclick="return confirm('Rollback to version {{ version.version_number }}?')">Rollback</button>
+                            </form>
+                            {% else %}
+                            <span class="badge bg-success">Current</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

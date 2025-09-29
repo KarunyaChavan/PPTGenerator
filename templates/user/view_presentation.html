@@ -1,0 +1,72 @@
+{% extends "base.html" %}
+
+{% block title %}View Presentation - {{ presentation.title }}{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h1>{{ presentation.title }}</h1>
+        <div>
+            <a href="{{ url_for('user.dashboard') }}" class="btn btn-outline-secondary">← Back to Dashboard</a>
+            {% if current_user.id == presentation.author_id and presentation.status in ['pending', 'rejected'] %}
+                <a href="{{ url_for('user.edit_presentation', id=presentation.id) }}" class="btn btn-warning ms-2">✏️ Edit</a>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Presentation Info -->
+    <div class="card mb-4">
+        <div class="card-body">
+            <p><strong>Author:</strong> {{ presentation.author.username }}</p>
+            <p><strong>Status:</strong> 
+                {% if presentation.status == 'approved' %}
+                    <span class="badge bg-success">{{ presentation.status.capitalize() }}</span>
+                {% elif presentation.status == 'rejected' %}
+                    <span class="badge bg-danger">{{ presentation.status.capitalize() }}</span>
+                {% else %}
+                    <span class="badge bg-warning text-dark">{{ presentation.status.capitalize() }}</span>
+                {% endif %}
+            </p>
+            <p><strong>Submitted At:</strong> {{ presentation.created_at.strftime('%d %b %Y %H:%M') }}</p>
+            {% if presentation.description %}
+                <p><strong>Description:</strong> {{ presentation.description }}</p>
+            {% endif %}
+            {% if presentation.agenda %}
+                <p><strong>Agenda:</strong></p>
+                <ul>
+                    {% for item in presentation.agenda.splitlines() %}
+                        <li>{{ item }}</li>
+                    {% endfor %}
+                </ul>
+            {% endif %}
+            {% if presentation.review_notes %}
+                <hr>
+                <p><strong>Admin Feedback:</strong> {{ presentation.review_notes }}</p>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Slides -->
+    {% if presentation.slides %}
+        <h3 class="mb-3">Slides</h3>
+        {% for slide in presentation.slides %}
+            <div class="card mb-3">
+                <div class="card-header">
+                    <strong>Slide {{ loop.index }}: {{ slide.title }}</strong>
+                </div>
+                <div class="card-body">
+                    {% for line in slide.content.splitlines() %}
+                        {% if line.strip().startswith('•') or line.strip().startswith('-') %}
+                            <li>{{ line.strip()[1:] }}</li>
+                        {% else %}
+                            <p>{{ line }}</p>
+                        {% endif %}
+                    {% endfor %}
+                </div>
+            </div>
+        {% endfor %}
+    {% else %}
+        <p class="text-muted">No slides found for this presentation.</p>
+    {% endif %}
+</div>
+{% endblock %}
