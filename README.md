@@ -11,7 +11,7 @@ A local web application for automated PowerPoint presentation generation with ve
 - **Local Storage**: SQLite database with file-based PPT storage
 
 ## Project Structure
-
+If you find some of directories are missing, then create them first
 ```
 PPTGenerator/
 ├── app/                    # Main application package
@@ -19,7 +19,7 @@ PPTGenerator/
 │   ├── routes/            # Flask route handlers
 │   ├── services/          # Business logic services
 │   └── utils/             # Utility functions
-├── static/                # Static assets (CSS, JS, images)
+    |── static/            # Static assets (CSS, JS, images)                
 ├── templates/             # HTML templates
 ├── storage/               # PPT file storage
 ├── database/              # SQLite database location
