@@ -1,2 +1,4 @@
 /.env
+/storage/ppts
+/database/pptgen.db
 /__pycache__

@@ -7,6 +7,7 @@
     <h1 style="color: var(--primary-color);">✏️ Edit Presentation</h1>
     <a href="{{ url_for('user.view_presentation', id=presentation.id) }}" class="btn btn-outline">← Back to Presentation</a>
 </div>
+
 <form method="POST" id="presentation-form" novalidate>
     {{ form.hidden_tag() }}
     <!-- Basic Information -->
@@ -50,7 +51,7 @@
                 Edit your presentation by adding, removing, or updating slides. Each slide should have a title and content.
             </p>
             <div id="slides-container"></div>
-            <div id="no-slides-message" class="text-center d-none" style="padding: 2rem; background: var(--light-color); border-radius: 4px;">
+            <div id="no-slides-message" class="text-center" style="padding: 2rem; background: var(--light-color); border-radius: 4px;">
                 <div style="font-size: 2rem; margin-bottom: 1rem;">📄</div>
                 <p>No slides added yet. Click "Add Slide" to get started!</p>
             </div>
@@ -63,130 +64,4 @@
         </button>
     </div>
 </form>
-<div style="display:none">
-    <script type="application/json" id="initial-slides-data">
-        {{ slides_list|tojson|safe }}
-    </script>
-</div>
-<script>
-// Initial slides from backend (robust)
-const initialSlides = JSON.parse(document.getElementById('initial-slides-data').textContent);
-
-class SlideManager {
-    constructor(slides) {
-        this.slides = slides || [];
-        this.slideCounter = this.slides.length;
-        this.container = document.getElementById('slides-container');
-        this.noSlidesMsg = document.getElementById('no-slides-message');
-        this.dataField = document.getElementById('slides_data');
-        this.render();
-        this.updateNoSlidesMessage();
-        this.updateSlidesData();
-        document.getElementById('add-slide-btn').onclick = () => this.addSlide();
-    }
-    render() {
-        this.container.innerHTML = '';
-        this.slides.forEach((slide, idx) => {
-            const slideDiv = document.createElement('div');
-            slideDiv.className = 'slide-item';
-            slideDiv.id = `slide-${idx+1}`;
-            slideDiv.innerHTML = `
-                <div class="slide-header d-flex justify-content-between align-items-center">
-                    <div class="d-flex align-items-center">
-                        <span class="slide-number">Slide ${idx+1}</span>
-                    </div>
-                    <button type="button" class="btn btn-danger btn-sm" data-remove="${idx}">Remove</button>
-                </div>
-                <div class="slide-content">
-                    <div class="form-group">
-                        <label class="form-label">Slide Title</label>
-                        <input type="text" class="form-control slide-title" value="${slide.title.replace(/"/g, '&quot;')}" placeholder="Enter slide title" data-idx="${idx}" required>
-                    </div>
-                    <div class="form-group">
-                        <label class="form-label">Slide Content</label>
-                        <textarea class="form-control slide-content-text" rows="6" placeholder="Enter slide content. Use bullet points with • or - for lists." data-idx="${idx}" required>${slide.content}</textarea>
-                        <small class="form-text text-muted">Tip: Use • or - for bullet points, and indent with spaces for sub-bullets</small>
-                    </div>
-                </div>
-            `;
-            this.container.appendChild(slideDiv);
-        });
-        // Attach events
-        this.container.querySelectorAll('.btn-danger[data-remove]').forEach(btn => {
-            btn.onclick = (e) => {
-                const idx = parseInt(btn.getAttribute('data-remove'));
-                this.removeSlide(idx);
-            };
-        });
-        this.container.querySelectorAll('.slide-title').forEach(input => {
-            input.oninput = (e) => {
-                const idx = parseInt(input.getAttribute('data-idx'));
-                this.slides[idx].title = input.value;
-                this.updateSlidesData();
-            };
-        });
-        this.container.querySelectorAll('.slide-content-text').forEach(input => {
-            input.oninput = (e) => {
-                const idx = parseInt(input.getAttribute('data-idx'));
-                this.slides[idx].content = input.value;
-                this.updateSlidesData();
-            };
-        });
-    }
-    addSlide() {
-        this.slides.push({title: '', content: ''});
-        this.slideCounter = this.slides.length;
-        this.render();
-        this.updateNoSlidesMessage();
-        this.updateSlidesData();
-    }
-    removeSlide(idx) {
-        this.slides.splice(idx, 1);
-        this.slideCounter = this.slides.length;
-        this.render();
-        this.updateNoSlidesMessage();
-        this.updateSlidesData();
-    }
-    updateNoSlidesMessage() {
-        if (this.slides.length === 0) {
-            this.noSlidesMsg.classList.remove('d-none');
-        } else {
-            this.noSlidesMsg.classList.add('d-none');
-        }
-    }
-    updateSlidesData() {
-        if (this.dataField) {
-            this.dataField.value = JSON.stringify(this.slides);
-        }
-    }
-}
-
-document.addEventListener('DOMContentLoaded', function() {
-    window.slideManager = new SlideManager(initialSlides);
-    document.getElementById('presentation-form').onsubmit = function(e) {
-        // Always update slides array from DOM before validation
-        const slideItems = document.querySelectorAll('.slide-item');
-        window.slideManager.slides = Array.from(slideItems).map(function(item, idx) {
-            return {
-                title: item.querySelector('.slide-title').value,
-                content: item.querySelector('.slide-content-text').value
-            };
-        });
-        window.slideManager.updateSlidesData();
-        if (window.slideManager.slides.length === 0) {
-            e.preventDefault();
-            alert('Please add at least one slide to your presentation.');
-            return false;
-        }
-        for (let s of window.slideManager.slides) {
-            if (!s.title.trim()) {
-                e.preventDefault();
-                alert('Please provide titles for all slides.');
-                return false;
-            }
-        }
-        return true;
-    };
-});
-</script>
 {% endblock %}
